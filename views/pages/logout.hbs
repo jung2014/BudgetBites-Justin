@@ -1,0 +1,38 @@
+<div class="logout-page bg-body-tertiary py-5">
+  <div class="container">
+    <div class="row justify-content-center align-items-center" style="min-height: calc(100vh - 200px);">
+      <div class="col-12 col-md-6 col-lg-5">
+        <div class="card border-0 shadow-lg">
+          <div class="card-body p-5 text-center">
+            <div class="mb-4">
+              <i class="bi bi-check-circle text-success" style="font-size: 4rem;"></i>
+            </div>
+            <h2 class="card-title fw-bold mb-3">Logged Out</h2>
+            
+            {{> message}}
+            
+            <p class="text-muted mb-4">You have been successfully logged out.</p>
+            
+            <div class="d-grid">
+              <a href="/login" class="btn btn-primary btn-lg shadow-sm">
+                <i class="bi bi-box-arrow-in-right me-2"></i>Log In Again
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .logout-page {
+    min-height: calc(100vh - 120px);
+    background: linear-gradient(180deg, rgba(34, 197, 94, 0.12) 0%, rgba(22, 163, 74, 0.08) 40%, rgba(255, 255, 255, 0.85) 100%);
+  }
+
+  .logout-page .card {
+    border-radius: 2rem;
+  }
+</style>
+

@@ -1,0 +1,258 @@
+<div class="discover-page bg-body-tertiary py-5">
+  <div class="container-xxl px-3 px-md-4">
+    <div class="row">
+      <div class="col-12">
+        <section class="discover-hero position-relative overflow-hidden rounded-5 p-5 p-md-6 mb-5 text-white">
+          <div class="row align-items-center g-4">
+            <div class="col-lg-7">
+              <span class="badge text-bg-light text-uppercase fw-semibold mb-3 shadow-sm">Account management</span>
+              <h1 class="display-5 fw-bold mb-3">Settings & Preferences</h1>
+              <p class="lead text-white-75 mb-4">Customize your account settings and meal planning preferences to get the most out of BudgetBites.</p>
+            </div>
+            <div class="col-lg-5">
+              <div class="discover-hero-illustration card border-0 shadow-lg">
+                <div class="card-body p-4">
+                  <div class="d-flex justify-content-between align-items-start mb-4">
+                    <div>
+                      <p class="text-uppercase text-muted small mb-1">Quick access</p>
+                      <h5 class="mb-0 text-dark">Your Settings</h5>
+                    </div>
+                    <span class="badge rounded-pill text-bg-success">Active</span>
+                  </div>
+                  <ul class="list-unstyled small text-muted mb-0">
+                    <li class="d-flex align-items-center mb-2">
+                      <span class="discover-dot bg-success-subtle me-2"></span>
+                      Account security
+                    </li>
+                    <li class="d-flex align-items-center mb-2">
+                      <span class="discover-dot bg-warning-subtle me-2"></span>
+                      Meal preferences
+                    </li>
+                    <li class="d-flex align-items-center">
+                      <span class="discover-dot bg-info-subtle me-2"></span>
+                      Personalized sorting
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {{#if message}}
+        <div class="alert alert-{{#if error}}danger{{else}}success{{/if}} alert-dismissible fade show shadow-sm mb-5" role="alert">
+          {{message}}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {{/if}}
+
+        <!-- Account Settings Section -->
+        <section class="card border-0 shadow-lg mb-5">
+          <div class="card-header bg-white py-4 px-4 px-md-5 border-0">
+            <div>
+              <p class="text-uppercase text-secondary small fw-semibold mb-1">Account settings</p>
+              <h5 class="mb-0 fw-semibold">Manage your account information</h5>
+            </div>
+          </div>
+          <div class="card-body px-4 px-md-5 pb-5">
+          
+            <!-- Update Username Form -->
+            <div class="mb-5">
+              <h4 class="mb-4 fw-semibold">Change Username</h4>
+              <form action="/settings/username" method="POST" class="row g-3">
+                <div class="col-12">
+                  <label for="current-username" class="form-label">Current Username</label>
+                  <input 
+                    type="text" 
+                    class="form-control form-control-lg" 
+                    id="current-username" 
+                    value="{{user.username}}" 
+                    disabled>
+                </div>
+                <div class="col-12">
+                  <label for="new-username" class="form-label">New Username</label>
+                  <input 
+                    type="text" 
+                    class="form-control form-control-lg" 
+                    id="new-username" 
+                    name="username" 
+                    placeholder="Enter new username"
+                    required>
+                </div>
+                <div class="col-12">
+                  <button type="submit" class="btn btn-primary btn-lg">Update Username</button>
+                </div>
+              </form>
+            </div>
+            
+            <hr class="my-5">
+            
+            <!-- Update Password Form -->
+            <div class="mb-5">
+              <h4 class="mb-4 fw-semibold">Change Password</h4>
+              <form action="/settings/password" method="POST" class="row g-3">
+                <div class="col-12">
+                  <label for="current-password" class="form-label">Current Password</label>
+                  <input 
+                    type="password" 
+                    class="form-control form-control-lg" 
+                    id="current-password" 
+                    name="currentPassword" 
+                    placeholder="Enter current password"
+                    required>
+                </div>
+                <div class="col-12">
+                  <label for="new-password" class="form-label">New Password</label>
+                  <input 
+                    type="password" 
+                    class="form-control form-control-lg" 
+                    id="new-password" 
+                    name="newPassword" 
+                    placeholder="Enter new password"
+                    required>
+                </div>
+                <div class="col-12">
+                  <label for="confirm-password" class="form-label">Confirm New Password</label>
+                  <input 
+                    type="password" 
+                    class="form-control form-control-lg" 
+                    id="confirm-password" 
+                    name="confirmPassword" 
+                    placeholder="Confirm new password"
+                    required>
+                </div>
+                <div class="col-12">
+                  <button type="submit" class="btn btn-primary btn-lg">Update Password</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </section>
+
+        <!-- Meal Sorting Preferences Section -->
+        <section class="card border-0 shadow-lg">
+          <div class="card-header bg-white py-4 px-4 px-md-5 border-0">
+            <div>
+              <p class="text-uppercase text-secondary small fw-semibold mb-1">Meal planning</p>
+              <h5 class="mb-0 fw-semibold">Customize your recipe sorting preferences</h5>
+            </div>
+          </div>
+          <div class="card-body px-4 px-md-5 pb-5">
+            <p class="text-muted mb-4">Customize how recipes are sorted and prioritized for your weekly meal plans</p>
+            <form action="/settings/preferences" method="POST" class="row gy-4">
+              <div class="col-md-6">
+                <label for="sort_by" class="form-label">Sort By</label>
+                <div class="form-floating">
+                  <select class="form-select" id="sort_by" name="sort_by" required>
+                    <option value="relevance" {{#if (eq preferences.sort_by 'relevance')}}selected{{/if}}>Relevance</option>
+                    <option value="price" {{#if (eq preferences.sort_by 'price')}}selected{{/if}}>Price (per serving)</option>
+                    <option value="time" {{#if (eq preferences.sort_by 'time')}}selected{{/if}}>Ready Time</option>
+                    <option value="calories" {{#if (eq preferences.sort_by 'calories')}}selected{{/if}}>Calories</option>
+                    <option value="health" {{#if (eq preferences.sort_by 'health')}}selected{{/if}}>Health Score</option>
+                    <option value="popularity" {{#if (eq preferences.sort_by 'popularity')}}selected{{/if}}>Popularity</option>
+                  </select>
+                  <label for="sort_by">Choose sorting method</label>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <label for="sort_order" class="form-label">Sort Order</label>
+                <div class="form-floating">
+                  <select class="form-select" id="sort_order" name="sort_order" required>
+                    <option value="asc" {{#if (eq preferences.sort_order 'asc')}}selected{{/if}}>Ascending (Low to High)</option>
+                    <option value="desc" {{#if (eq preferences.sort_order 'desc')}}selected{{/if}}>Descending (High to Low)</option>
+                  </select>
+                  <label for="sort_order">Choose order direction</label>
+                </div>
+              </div>
+
+              <div class="mb-4">
+                <label class="form-label mb-3">Priority Factors (1-10 scale)</label>
+                <p class="text-muted small mb-3">Adjust the importance of each factor when generating meal plans. Higher values = more important.</p>
+                
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <label for="price_priority" class="form-label">Price Priority</label>
+                    <input 
+                      type="range" 
+                      class="form-range" 
+                      id="price_priority" 
+                      name="price_priority" 
+                      min="1" 
+                      max="10" 
+                      step="1"
+                      value="{{preferences.priority_factors.price}}"
+                      oninput="document.getElementById('price_value').textContent = this.value">
+                    <div class="d-flex justify-content-between">
+                      <small class="text-muted">Low</small>
+                      <span id="price_value" class="fw-bold">{{preferences.priority_factors.price}}</span>
+                      <small class="text-muted">High</small>
+                    </div>
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label for="time_priority" class="form-label">Time Priority</label>
+                    <input 
+                      type="range" 
+                      class="form-range" 
+                      id="time_priority" 
+                      name="time_priority" 
+                      min="1" 
+                      max="10" 
+                      step="1"
+                      value="{{preferences.priority_factors.time}}"
+                      oninput="document.getElementById('time_value').textContent = this.value">
+                    <div class="d-flex justify-content-between">
+                      <small class="text-muted">Low</small>
+                      <span id="time_value" class="fw-bold">{{preferences.priority_factors.time}}</span>
+                      <small class="text-muted">High</small>
+                    </div>
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label for="calories_priority" class="form-label">Calories Priority</label>
+                    <input 
+                      type="range" 
+                      class="form-range" 
+                      id="calories_priority" 
+                      name="calories_priority" 
+                      min="1" 
+                      max="10" 
+                      step="1"
+                      value="{{preferences.priority_factors.calories}}"
+                      oninput="document.getElementById('calories_value').textContent = this.value">
+                    <div class="d-flex justify-content-between">
+                      <small class="text-muted">Low</small>
+                      <span id="calories_value" class="fw-bold">{{preferences.priority_factors.calories}}</span>
+                      <small class="text-muted">High</small>
+                    </div>
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label for="health_priority" class="form-label">Health Priority</label>
+                    <input 
+                      type="range" 
+                      class="form-range" 
+                      id="health_priority" 
+                      name="health_priority" 
+                      min="1" 
+                      max="10" 
+                      step="1"
+                      value="{{preferences.priority_factors.health}}"
+                      oninput="document.getElementById('health_value').textContent = this.value">
+                    <div class="d-flex justify-content-between">
+                      <small class="text-muted">Low</small>
+                      <span id="health_value" class="fw-bold">{{preferences.priority_factors.health}}</span>
+                      <small class="text-muted">High</small>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-12">
+                <button type="submit" class="btn btn-primary btn-lg">Save Preferences</button>
+              </div>
+            </form>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+</div>
+

@@ -1,0 +1,180 @@
+<div class="discover-page bg-body-tertiary py-5">
+  <div class="container-xxl px-3 px-md-4">
+    <div class="row">
+      <div class="col-12">
+        <section class="discover-hero position-relative overflow-hidden rounded-5 p-5 p-md-6 mb-5 text-white">
+          <div class="row align-items-center g-4">
+            <div class="col-lg-7">
+              <span class="badge text-bg-light text-uppercase fw-semibold mb-3 shadow-sm">Your personal cookbook</span>
+              <h1 class="display-5 fw-bold mb-3">Favorite Recipes</h1>
+              <p class="lead text-white-75 mb-4">Save go-to meals and build grocery lists from your personal collection of favorite recipes.</p>
+            </div>
+            <div class="col-lg-5">
+              <div class="discover-hero-illustration card border-0 shadow-lg">
+                <div class="card-body p-4">
+                  <div class="d-flex justify-content-between align-items-start mb-4">
+                    <div>
+                      <p class="text-uppercase text-muted small mb-1">Quick actions</p>
+                      <h5 class="mb-0 text-dark">Manage Favorites</h5>
+                    </div>
+                    <span class="badge rounded-pill text-bg-success">Saved</span>
+                  </div>
+                  <ul class="list-unstyled small text-muted mb-0">
+                    <li class="d-flex align-items-center mb-2">
+                      <span class="discover-dot bg-success-subtle me-2"></span>
+                      Build grocery lists
+                    </li>
+                    <li class="d-flex align-items-center mb-2">
+                      <span class="discover-dot bg-warning-subtle me-2"></span>
+                      Organize your meals
+                    </li>
+                    <li class="d-flex align-items-center">
+                      <span class="discover-dot bg-info-subtle me-2"></span>
+                      Quick access anytime
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {{#if message}}
+        <div class="alert alert-{{#if error}}danger{{else}}success{{/if}} alert-dismissible fade show shadow-sm mb-5" role="alert">
+          {{message}}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {{/if}}
+
+        {{#if favorites.length}}
+        <form method="POST" action="/discover/grocery-list" id="favoritesGroceryForm"></form>
+
+        <section class="card border-0 shadow-lg mb-5">
+          <div class="card-header bg-white py-4 px-4 px-md-5 border-0">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 w-100">
+              <div>
+                <p class="text-uppercase text-secondary small fw-semibold mb-1">Your saved recipes</p>
+                <h5 class="mb-0 fw-semibold">Select recipes to build your grocery list</h5>
+              </div>
+              <button 
+                type="submit" 
+                class="btn btn-success btn-lg" 
+                id="favoritesGroceryButton" 
+                form="favoritesGroceryForm"
+                disabled>
+                Build Grocery List (<span id="favoriteSelectedCount">0</span>)
+              </button>
+            </div>
+          </div>
+          <div class="card-body px-4 px-md-5 pb-5">
+            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+        {{#each favorites}}
+        <div class="col">
+          <div class="card h-100 shadow-sm">
+            {{#if image}}
+            <img src="{{image}}" alt="{{title}}" class="card-img-top" style="height: 200px; object-fit: cover;">
+            {{/if}}
+            <div class="card-body d-flex flex-column">
+              <h5 class="card-title">{{title}}</h5>
+              <div class="form-check mb-3">
+                <input 
+                  type="checkbox" 
+                  class="form-check-input favorite-checkbox" 
+                  name="recipeIds[]" 
+                  value="{{id}}" 
+                  id="favorite-{{id}}"
+                  form="favoritesGroceryForm"
+                  onchange="updateFavoriteSelectedCount()">
+                <label class="form-check-label" for="favorite-{{id}}">
+                  Add to grocery list
+                </label>
+              </div>
+
+              <div class="d-flex flex-wrap gap-2 mb-3">
+                {{#if readyInMinutes}}
+                <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle">
+                  {{readyInMinutes}} min
+                </span>
+                {{/if}}
+                {{#if servings}}
+                <span class="badge bg-secondary-subtle text-secondary-emphasis border border-secondary-subtle">
+                  Serves {{servings}}
+                </span>
+                {{/if}}
+                {{#if pricePerServing}}
+                <span class="badge bg-success-subtle text-success-emphasis border border-success-subtle">
+                  ${{formatPrice pricePerServing}} / serving
+                </span>
+                {{/if}}
+                {{#if totalIngredientCost}}
+                <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle">
+                  {{formatCurrency totalIngredientCost}} total
+                </span>
+                {{/if}}
+              </div>
+
+              {{#if summary}}
+              <p class="card-text small text-muted mb-3 flex-grow-1" style="max-height: 110px; overflow-y: auto;">
+                {{summary}}
+              </p>
+              {{/if}}
+
+              <div class="mt-auto">
+                <form method="POST" action="/favorites/remove" class="mb-2">
+                  <input type="hidden" name="recipeId" value="{{id}}">
+                  <input type="hidden" name="redirectTo" value="/favorites">
+                  <button type="submit" class="btn btn-sm btn-outline-danger w-100">
+                    Remove from Favorites
+                  </button>
+                </form>
+                {{#if sourceUrl}}
+                <a href="{{sourceUrl}}" target="_blank" class="btn btn-sm btn-outline-primary w-100">
+                  View Full Recipe
+                </a>
+                {{else}}
+                <a href="/recipes/{{id}}" class="btn btn-sm btn-outline-primary w-100">
+                  View Recipe Details
+                </a>
+                {{/if}}
+              </div>
+            </div>
+          </div>
+        </div>
+            {{/each}}
+          </div>
+        </div>
+        </section>
+        {{else}}
+        <section class="card border-0 shadow-lg">
+          <div class="card-body text-center py-5 px-4 px-md-5">
+            <div class="mb-4">
+              <i class="bi bi-heart" style="font-size: 4rem; color: var(--grey-medium);"></i>
+            </div>
+            <h3 class="fw-bold mb-3">No favorites yet</h3>
+            <p class="lead text-muted mb-4">Start saving recipes you love to build your personal cookbook.</p>
+            <a href="/discover" class="btn btn-primary btn-lg">Start Discovering Recipes</a>
+          </div>
+        </section>
+        {{/if}}
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function updateFavoriteSelectedCount() {
+  const checkboxes = document.querySelectorAll('.favorite-checkbox:checked');
+  const count = checkboxes.length;
+  const countTarget = document.getElementById('favoriteSelectedCount');
+  const submitButton = document.getElementById('favoritesGroceryButton');
+
+  if (countTarget) {
+    countTarget.textContent = count;
+  }
+  if (submitButton) {
+    submitButton.disabled = count === 0;
+  }
+}
+
+document.addEventListener('DOMContentLoaded', updateFavoriteSelectedCount);
+</script>

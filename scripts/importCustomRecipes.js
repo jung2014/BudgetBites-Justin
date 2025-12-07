@@ -1,0 +1,526 @@
+#!/usr/bin/env node
+/**
+ * Import custom CSV recipes (with local images) into the application's database.
+ *
+ * Usage:
+ *   node scripts/importCustomRecipes.js --csv ./data/custom.csv \
+ *        [--image-source ./images] [--image-dest ./public/images/custom] \
+ *        [--image-url /images/custom] [--image-ext .jpg] [--id-offset 400000000]
+ *        [--dry-run] [--force]
+ */
+
+const fs = require('fs');
+const path = require('path');
+
+const { saveRecipeToDatabase } = require('../src/services/recipeService');
+const { db } = require('../src/config/db');
+
+const DEFAULTS = {
+  imageOutputDir: path.join(__dirname, '..', 'public', 'recipe-images', 'custom'),
+  imagePublicPath: '/recipe-images/custom',
+  imageExtension: '.jpg',
+  idOffset: Number(process.env.CUSTOM_RECIPE_ID_OFFSET) || 400_000_000,
+  defaultServings: Number(process.env.CUSTOM_RECIPE_DEFAULT_SERVINGS) || 4,
+};
+
+const loadEnvOptions = () => ({
+  csvPath: process.env.CUSTOM_RECIPE_CSV || null,
+  imageSourceDir: process.env.CUSTOM_RECIPE_IMAGE_SOURCE || null,
+  imageOutputDir: process.env.CUSTOM_RECIPE_IMAGE_DEST || null,
+  imagePublicPath: process.env.CUSTOM_RECIPE_IMAGE_URL || null,
+  imageExtension: process.env.CUSTOM_RECIPE_IMAGE_EXT || null,
+  idOffset:
+    process.env.CUSTOM_RECIPE_ID_OFFSET !== undefined
+      ? Number(process.env.CUSTOM_RECIPE_ID_OFFSET)
+      : null,
+  defaultServings:
+    process.env.CUSTOM_RECIPE_DEFAULT_SERVINGS !== undefined
+      ? Number(process.env.CUSTOM_RECIPE_DEFAULT_SERVINGS)
+      : null,
+  dryRun: process.env.CUSTOM_RECIPE_DRY_RUN === 'true',
+  force: process.env.CUSTOM_RECIPE_FORCE === 'true',
+});
+
+const parseArgs = () => {
+  const args = process.argv.slice(2);
+  const envOptions = loadEnvOptions();
+  const options = {
+    csvPath: envOptions.csvPath,
+    imageSourceDir: envOptions.imageSourceDir,
+    imageOutputDir: envOptions.imageOutputDir || DEFAULTS.imageOutputDir,
+    imagePublicPath: envOptions.imagePublicPath || DEFAULTS.imagePublicPath,
+    imageExtension: envOptions.imageExtension || DEFAULTS.imageExtension,
+    idOffset: envOptions.idOffset ?? DEFAULTS.idOffset,
+      defaultServings: envOptions.defaultServings ?? DEFAULTS.defaultServings,
+      dryRun: envOptions.dryRun,
+      force: envOptions.force,
+    };
+
+  for (let i = 0; i < args.length; i += 1) {
+    const arg = args[i];
+    switch (arg) {
+      case '--csv':
+      case '-c':
+        options.csvPath = args[i + 1];
+        i += 1;
+        break;
+      case '--image-source':
+        options.imageSourceDir = args[i + 1];
+        i += 1;
+        break;
+      case '--image-dest':
+        options.imageOutputDir = args[i + 1];
+        i += 1;
+        break;
+      case '--image-url':
+        options.imagePublicPath = args[i + 1];
+        i += 1;
+        break;
+      case '--image-ext':
+        options.imageExtension = args[i + 1];
+        i += 1;
+        break;
+      case '--id-offset':
+        options.idOffset = Number(args[i + 1]);
+        i += 1;
+        break;
+      case '--dry-run':
+        options.dryRun = true;
+        break;
+      case '--force':
+        options.force = true;
+        break;
+      default:
+        if (!arg.startsWith('--') && !options.csvPath) {
+          options.csvPath = arg;
+        } else {
+          console.warn(`Ignoring unrecognized argument: ${arg}`);
+        }
+    }
+  }
+
+  if (!options.csvPath) {
+    const hint = isRenderEnvironment()
+      ? 'Set CUSTOM_RECIPE_CSV in your Render one-off job env.'
+      : 'Pass --csv <path-to-file>.';
+    throw new Error(`Missing required CSV path. ${hint}`);
+  }
+
+  options.idOffset = Number.isFinite(options.idOffset) ? options.idOffset : DEFAULTS.idOffset;
+  options.defaultServings = Number.isFinite(options.defaultServings)
+    ? options.defaultServings
+    : DEFAULTS.defaultServings;
+
+  options.csvPath = path.resolve(options.csvPath);
+  if (options.imageSourceDir) {
+    options.imageSourceDir = path.resolve(options.imageSourceDir);
+  }
+  options.imageOutputDir = path.resolve(options.imageOutputDir);
+  options.imagePublicPath = options.imagePublicPath.replace(/\\/g, '/');
+  if (!options.imagePublicPath.startsWith('/')) {
+    options.imagePublicPath = `/${options.imagePublicPath}`;
+  }
+
+  return options;
+};
+
+const readCsvFile = async (filePath) => {
+  let content = await fs.promises.readFile(filePath, 'utf8');
+  if (content.charCodeAt(0) === 0xfeff) {
+    content = content.slice(1);
+  }
+
+  const rows = [];
+  let currentValue = '';
+  let currentRow = [];
+  let inQuotes = false;
+
+  for (let i = 0; i < content.length; i += 1) {
+    const char = content[i];
+
+    if (char === '"') {
+      if (inQuotes && content[i + 1] === '"') {
+        currentValue += '"';
+        i += 1;
+      } else {
+        inQuotes = !inQuotes;
+      }
+      continue;
+    }
+
+    if (char === ',' && !inQuotes) {
+      currentRow.push(currentValue);
+      currentValue = '';
+      continue;
+    }
+
+    if ((char === '\n' || char === '\r') && !inQuotes) {
+      currentRow.push(currentValue);
+      currentValue = '';
+      const hasContent = currentRow.some((cell) => cell && cell.trim().length > 0);
+      if (hasContent || rows.length === 0) {
+        rows.push(currentRow);
+      }
+      currentRow = [];
+      if (char === '\r' && content[i + 1] === '\n') {
+        i += 1;
+      }
+      continue;
+    }
+
+    currentValue += char;
+  }
+
+  if (currentValue.length > 0 || currentRow.length > 0) {
+    currentRow.push(currentValue);
+    rows.push(currentRow);
+  }
+
+  if (!rows.length) {
+    return [];
+  }
+
+  const headerRow = rows.shift();
+  const headers = headerRow.map((header) => header.trim());
+
+  return rows
+    .filter((row) => row.some((cell) => cell && cell.trim().length > 0))
+    .map((row) => {
+      const record = {};
+      headers.forEach((header, idx) => {
+        record[header] = row[idx] !== undefined ? row[idx] : '';
+      });
+      return record;
+    });
+};
+
+const parseListColumn = (value = '') => {
+  let content = value.trim();
+  if (!content) {
+    return [];
+  }
+
+  if (content.startsWith('[') && content.endsWith(']')) {
+    content = content.slice(1, -1);
+  }
+
+  const items = [];
+  let buffer = '';
+  let inString = false;
+
+  for (let i = 0; i < content.length; i += 1) {
+    const char = content[i];
+    if (char === '\'' && content[i - 1] !== '\\') {
+      inString = !inString;
+      if (!inString) {
+        const normalized = buffer.trim();
+        if (normalized.length > 0) {
+          items.push(normalized);
+        }
+        buffer = '';
+      }
+      continue;
+    }
+
+    if (inString) {
+      buffer += char;
+    }
+  }
+
+  return items.map((entry) => entry.replace(/\s+/g, ' ').trim());
+};
+
+const parseInstructions = (value = '') => {
+  return value
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0);
+};
+
+const toPosixPath = (inputPath) => inputPath.replace(/\\/g, '/');
+
+const computeStableId = (rowIndex, offset) => {
+  // Keep ids within 32-bit integer range while ensuring deterministic ordering.
+  return offset + rowIndex + 1;
+};
+
+const clampNumber = (value, min, max) => {
+  return Math.max(min, Math.min(max, value));
+};
+
+const estimateServings = (row, fallback) => {
+  const raw = row.Servings || row.servings;
+  if (raw) {
+    const parsed = Number(raw);
+    if (!Number.isNaN(parsed) && parsed > 0) {
+      return Math.round(parsed);
+    }
+  }
+  return fallback;
+};
+
+const estimateReadyMinutes = (instructionCount, ingredientCount) => {
+  const base = 15;
+  const stepLoad = instructionCount * 4;
+  const ingredientLoad = Math.max(0, ingredientCount - 5) * 1.5;
+  const total = base + stepLoad + ingredientLoad;
+  return clampNumber(Math.round(total), 10, 240);
+};
+
+const estimatePricePerServing = (ingredientCount, instructionCount) => {
+  const base = 1.5;
+  const ingredientContribution = ingredientCount * 0.7;
+  const complexityContribution = Math.max(0, instructionCount - 5) * 0.25;
+  const estimate = base + ingredientContribution + complexityContribution;
+  return clampNumber(Number(estimate.toFixed(2)), 1, 25);
+};
+
+const applyCostEstimates = (extendedIngredients, pricePerServing, servings) => {
+  if (!Array.isArray(extendedIngredients) || extendedIngredients.length === 0) {
+    return;
+  }
+
+  if (typeof pricePerServing !== 'number' || pricePerServing <= 0 || !servings) {
+    return;
+  }
+
+  const totalCost = pricePerServing * servings;
+  const perIngredient = totalCost / extendedIngredients.length;
+  const cents = Math.max(0, Math.round(perIngredient * 100));
+
+  extendedIngredients.forEach((ingredient) => {
+    ingredient.estimatedCost = {
+      value: cents,
+      unit: 'US Cents',
+    };
+  });
+};
+
+const ensureDir = async (dirPath) => {
+  await fs.promises.mkdir(dirPath, { recursive: true });
+};
+
+const isRenderEnvironment = () => {
+  return Boolean(process.env.RENDER || process.env.RENDER_EXTERNAL_URL || process.env.RENDER_SERVICE_ID);
+};
+
+const hasExistingCustomRecipes = async (lowerBound, upperBound) => {
+  try {
+    const result = await db.one(
+      'SELECT COUNT(*)::int AS count FROM recipes WHERE spoonacular_id BETWEEN $1 AND $2',
+      [lowerBound, upperBound],
+    );
+    return result.count > 0;
+  } catch (error) {
+    console.warn('Warning: unable to check for existing custom recipes:', error.message || error);
+    return false;
+  }
+};
+
+const printRenderOneOffInstructions = (options) => {
+  if (!isRenderEnvironment()) {
+    return;
+  }
+
+  const parts = ['npm run import:custom -- --csv', options.csvPath || './path/to/custom.csv'];
+  if (options.imageSourceDir) {
+    parts.push('--image-source', options.imageSourceDir);
+  }
+  if (options.imageOutputDir && options.imageOutputDir !== DEFAULTS.imageOutputDir) {
+    parts.push('--image-dest', options.imageOutputDir);
+  }
+  if (options.imagePublicPath && options.imagePublicPath !== DEFAULTS.imagePublicPath) {
+    parts.push('--image-url', options.imagePublicPath);
+  }
+  if (options.imageExtension && options.imageExtension !== DEFAULTS.imageExtension) {
+    parts.push('--image-ext', options.imageExtension);
+  }
+  if (options.idOffset && options.idOffset !== DEFAULTS.idOffset) {
+    parts.push('--id-offset', options.idOffset);
+  }
+
+  const exampleCommand = parts.join(' ');
+  console.log('\nRender detected: this import should be run once as a one-off job after deploy.');
+  console.log('Example Render command:\n ', exampleCommand);
+  console.log('If you have already run this job, the script will skip unless you supply --force.');
+};
+
+const copyImageIfNeeded = async (imageName, options) => {
+  if (!imageName) {
+    return null;
+  }
+
+  const normalizedExt = options.imageExtension.startsWith('.')
+    ? options.imageExtension
+    : `.${options.imageExtension}`;
+
+  const filename = /\.[a-zA-Z0-9]+$/.test(imageName)
+    ? imageName
+    : `${imageName}${normalizedExt}`;
+
+  if (options.imageSourceDir) {
+    const sourcePath = path.join(options.imageSourceDir, filename);
+    const destinationPath = path.join(options.imageOutputDir, filename);
+    try {
+      await ensureDir(options.imageOutputDir);
+      await fs.promises.copyFile(sourcePath, destinationPath);
+    } catch (error) {
+      console.warn(`Warning: unable to copy image ${filename}: ${error.message}`);
+      return null;
+    }
+  }
+
+  return toPosixPath(path.posix.join(options.imagePublicPath, filename));
+};
+
+const buildRecipePayload = async (row, rowIndex, options) => {
+  const title = row.Title?.trim();
+  if (!title) {
+    return null;
+  }
+
+  const instructions = parseInstructions(row.Instructions || row.Directions || '');
+  const ingredientList = parseListColumn(row.Ingredients || row.ingredients || '');
+  const cleanedList = parseListColumn(row.Cleaned_Ingredients || row.cleaned_ingredients || '');
+  const mergedIngredients = ingredientList.length > 0 ? ingredientList : cleanedList;
+  const imageUrl = await copyImageIfNeeded(row.Image_Name || row.image_name, options);
+  const recipeId = computeStableId(rowIndex, options.idOffset);
+
+  const servings = estimateServings(row, options.defaultServings);
+  const readyInMinutes = estimateReadyMinutes(instructions.length, mergedIngredients.length);
+  const pricePerServing = estimatePricePerServing(mergedIngredients.length, instructions.length);
+
+  const extendedIngredients = mergedIngredients.map((text, idx) => ({
+    id: `${recipeId}-${idx}`,
+    original: text,
+    originalString: text,
+    name: cleanedList[idx] || text,
+    amount: null,
+    unit: '',
+  }));
+
+  applyCostEstimates(extendedIngredients, pricePerServing, servings);
+
+  const analyzedInstructions = instructions.length
+    ? [
+        {
+          name: '',
+          steps: instructions.map((step, idx) => ({
+            number: idx + 1,
+            step,
+          })),
+        },
+      ]
+    : [];
+
+  const rawMetadata = {
+    source: 'custom_csv',
+    originalRow: row,
+    cleanedIngredients: cleanedList,
+  };
+
+  return {
+    id: recipeId,
+    title,
+    summary: row.Summary?.trim() || title,
+    sourceUrl: null,
+    image: imageUrl,
+    servings,
+    readyInMinutes,
+    pricePerServing,
+    extendedIngredients,
+    instructions: instructions.join('\n\n'),
+    analyzedInstructions,
+    diets: [],
+    dishTypes: [],
+    vegetarian: false,
+    vegan: false,
+    glutenFree: false,
+    dairyFree: false,
+    veryHealthy: false,
+    cheap: false,
+    aggregateLikes: 0,
+    spoonacularScore: null,
+    healthScore: null,
+    nutrition: null,
+    rawSource: 'custom_csv',
+    datasetMeta: {
+      ...rawMetadata,
+      heuristics: {
+        servings,
+        readyInMinutes,
+        pricePerServing,
+      },
+    },
+  };
+};
+
+const importCustomRecipes = async (options) => {
+  const rows = await readCsvFile(options.csvPath);
+  if (!rows.length) {
+    console.log('No data rows detected in CSV.');
+    return;
+  }
+
+  const lowerBoundId = computeStableId(0, options.idOffset);
+  const upperBoundId = computeStableId(rows.length - 1, options.idOffset);
+  printRenderOneOffInstructions(options);
+
+  if (!options.dryRun && !options.force) {
+    const alreadyImported = await hasExistingCustomRecipes(lowerBoundId, upperBoundId);
+    if (alreadyImported) {
+      console.log(
+        `Detected existing recipes in the custom ID range (${lowerBoundId}-${upperBoundId}). `
+        + 'Assuming the import already ran; exiting. Use --force to re-import.',
+      );
+      return;
+    }
+  }
+
+  console.log(`Processing ${rows.length} recipe rows...`);
+  let imported = 0;
+  for (let i = 0; i < rows.length; i += 1) {
+    const recipe = await buildRecipePayload(rows[i], i, options);
+    if (!recipe) {
+      console.warn(`Skipping row ${i + 1}: missing title.`);
+      continue;
+    }
+
+    if (options.dryRun) {
+      console.log(`[dry-run] ${recipe.title} -> would assign id ${recipe.id}`);
+      continue;
+    }
+
+    try {
+      await saveRecipeToDatabase(recipe);
+      imported += 1;
+      if (imported % 25 === 0) {
+        console.log(`Imported ${imported}/${rows.length} recipes...`);
+      }
+    } catch (error) {
+      console.error(`Failed to save recipe "${recipe.title}":`, error.message || error);
+    }
+  }
+
+  if (!options.dryRun) {
+    console.log(`Import complete. Saved ${imported} recipe(s).`);
+  } else {
+    console.log('Dry run complete. No recipes saved.');
+  }
+};
+
+if (require.main === module) {
+  (async () => {
+    try {
+      const options = parseArgs();
+      await importCustomRecipes(options);
+    } catch (error) {
+      console.error('Import failed:', error.message || error);
+      process.exitCode = 1;
+    }
+  })();
+}
+
+module.exports = {
+  importCustomRecipes,
+};
