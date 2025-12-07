@@ -1,0 +1,719 @@
+/* BudgetBites - Custom Styles */
+
+:root {
+  --primary-color: #22c55e;
+  --primary-dark: #16a34a;
+  --primary-light: #4ade80;
+  --secondary-color: #64748b;
+  --accent-color: #10b981;
+  --background-color: #f8fafc;
+  --text-primary: #1e293b;
+  --text-secondary: #64748b;
+  --grey-light: #e2e8f0;
+  --grey-medium: #cbd5e1;
+  --grey-dark: #475569;
+  --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  --card-shadow-hover: 0 4px 16px rgba(34, 197, 94, 0.15);
+  --border-radius: 12px;
+  --transition: all 0.3s ease;
+}
+
+/* Global Styles */
+body {
+  background-color: var(--background-color);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  color: var(--text-primary);
+  line-height: 1.6;
+}
+
+/* Navbar Customization */
+.navbar {
+  background-color: white !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  padding: 1rem 0;
+}
+
+.navbar-brand {
+  font-weight: 700;
+  font-size: 1.5rem;
+  color: #22c55e !important;
+  text-decoration: none;
+  transition: var(--transition);
+}
+
+.navbar-brand:hover {
+  color: #16a34a !important;
+  transform: scale(1.05);
+}
+
+.nav-link {
+  color: var(--text-secondary) !important;
+  font-weight: 500;
+  transition: var(--transition);
+  padding: 0.5rem 1rem !important;
+  border-radius: 6px;
+}
+
+.nav-link:hover {
+  color: var(--primary-color) !important;
+  background-color: rgba(34, 197, 94, 0.1);
+}
+
+/* Card Enhancements */
+.card {
+  border: none;
+  border-radius: var(--border-radius);
+  box-shadow: var(--card-shadow);
+  transition: var(--transition);
+  overflow: hidden;
+}
+
+.card:hover {
+  box-shadow: var(--card-shadow-hover);
+  transform: translateY(-2px);
+}
+
+.card-header {
+  background-color: var(--primary-color);
+  color: white;
+  border-bottom: none;
+  padding: 1rem 1.5rem;
+  font-weight: 600;
+}
+
+/* Fix white text on white background - when bg-white is used, use dark text */
+.card-header.bg-white {
+  background-color: white !important;
+  color: var(--text-primary) !important;
+}
+
+.card-header.bg-white h5,
+.card-header.bg-white h4,
+.card-header.bg-white h3,
+.card-header.bg-white h2,
+.card-header.bg-white h1,
+.card-header.bg-white p,
+.card-header.bg-white span,
+.card-header.bg-white div,
+.card-header.bg-white small,
+.card-header.bg-white .text-secondary,
+.card-header.bg-white .text-muted {
+  color: var(--text-primary) !important;
+}
+
+/* Ensure text-secondary and text-muted work on white backgrounds */
+.bg-white .text-secondary,
+.bg-white .text-muted {
+  color: var(--text-secondary) !important;
+}
+
+/* Fix any white text classes on white backgrounds */
+.bg-white .text-white,
+.bg-white .text-white-50,
+.bg-white .text-white-75 {
+  color: var(--text-primary) !important;
+}
+
+/* Ensure card headers with white background have proper text color */
+.card.bg-white .card-header,
+.card.bg-white .card-body {
+  color: var(--text-primary);
+}
+
+/* Fix any elements with white background */
+.bg-white,
+.bg-body-tertiary {
+  color: var(--text-primary);
+}
+
+.card-body {
+  padding: 1.5rem;
+}
+
+/* Buttons */
+.btn-primary {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+  font-weight: 600;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  transition: var(--transition);
+}
+
+.btn-primary:hover {
+  background-color: var(--primary-dark);
+  border-color: var(--primary-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(34, 197, 94, 0.3);
+}
+
+.btn-success {
+  background-color: #28a745;
+  border-color: #28a745;
+  font-weight: 600;
+  transition: var(--transition);
+}
+
+.btn-success:hover {
+  background-color: #218838;
+  border-color: #1e7e34;
+  transform: translateY(-1px);
+}
+
+.btn-outline-primary {
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+  font-weight: 500;
+  transition: var(--transition);
+}
+
+.btn-outline-primary:hover {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+  transform: translateY(-1px);
+}
+
+/* Form Controls */
+.form-control,
+.form-select {
+  border-radius: 8px;
+  border: 1px solid var(--grey-medium);
+  padding: 0.75rem;
+  transition: var(--transition);
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 0.2rem rgba(34, 197, 94, 0.25);
+}
+
+.form-label {
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+}
+
+/* Login/Register Cards */
+.container .card {
+  max-width: 500px;
+  margin: 2rem auto;
+}
+
+.card-title {
+  color: var(--primary-color);
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+/* Recipe Cards */
+.recipe-card {
+  transition: var(--transition);
+  cursor: pointer;
+}
+
+.recipe-card:hover {
+  transform: translateY(-4px);
+}
+
+.card-img-top {
+  transition: var(--transition);
+}
+
+.recipe-card:hover .card-img-top {
+  transform: scale(1.05);
+}
+
+/* Badges */
+.badge {
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  font-weight: 500;
+}
+
+/* Alerts */
+.alert {
+  border-radius: var(--border-radius);
+  border: none;
+  padding: 1rem 1.5rem;
+  box-shadow: var(--card-shadow);
+}
+
+.alert-success {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.alert-danger {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+/* Grocery List Styles */
+.grocery-list-section {
+  margin-top: 2rem;
+}
+
+.aisle-group {
+  margin-bottom: 2rem;
+}
+
+.aisle-header {
+  background-color: var(--secondary-color);
+  color: white;
+  padding: 0.75rem 1rem;
+  border-radius: 8px 8px 0 0;
+  font-weight: 600;
+  margin-bottom: 0;
+}
+
+.ingredient-item {
+  padding: 1rem;
+  border-bottom: 1px solid var(--grey-light);
+  transition: var(--transition);
+}
+
+.ingredient-item:hover {
+  background-color: var(--background-color);
+}
+
+.ingredient-item:last-child {
+  border-bottom: none;
+}
+
+/* Footer */
+footer {
+  margin-top: auto;
+  padding: 2rem 0;
+  background-color: white;
+  border-top: 1px solid var(--grey-light);
+}
+
+/* Utility Classes */
+.text-primary-custom {
+  color: var(--primary-color) !important;
+}
+
+.bg-primary-custom {
+  background-color: var(--primary-color) !important;
+}
+
+.shadow-custom {
+  box-shadow: var(--card-shadow);
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .card-body {
+    padding: 1rem;
+  }
+  
+  .container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  
+  .btn-lg {
+    padding: 0.625rem 1.25rem;
+    font-size: 1rem;
+  }
+  
+  /* Settings page mobile */
+  .container.mt-5 .row.justify-content-center > div {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+  
+  /* Discover page mobile */
+  .row.row-cols-1.row-cols-md-2.row-cols-lg-3 .col {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+    margin-bottom: 1rem;
+  }
+}
+
+/* Loading States */
+.loading {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--secondary-color);
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-color);
+}
+
+/* Animation for page transitions */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Container animation applied via class selector to avoid conflicts */
+.container.mt-4,
+.container.mt-5 {
+  animation: fadeIn 0.3s ease-in;
+}
+
+/* Checkbox Styling */
+.form-check-input:checked {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+.form-check-input:focus {
+  border-color: var(--primary-light);
+  box-shadow: 0 0 0 0.2rem rgba(34, 197, 94, 0.25);
+}
+
+/* Recipe Summary Scroll */
+.card-text {
+  scrollbar-width: thin;
+  scrollbar-color: var(--secondary-color) #f1f1f1;
+}
+
+/* Settings Page */
+.settings-section {
+  margin-bottom: 2rem;
+}
+
+.settings-section h3 {
+  color: var(--primary-color);
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid var(--grey-medium);
+}
+
+/* Settings Page Container - Make it wider and better fitting */
+.container .row.justify-content-center {
+  max-width: 100%;
+}
+
+.container .row.justify-content-center .col-md-8 {
+  max-width: 900px;
+  width: 100%;
+}
+
+.container .row.justify-content-center .col-lg-6 {
+  max-width: 900px;
+  width: 100%;
+}
+
+/* Settings Card - Better width utilization */
+.container .card.shadow {
+  width: 100%;
+  max-width: 100%;
+}
+
+/* Discover Page Improvements */
+.container.mt-4 {
+  max-width: 100%;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+/* Discover Search Form Card */
+.container .card.mb-4 {
+  width: 100%;
+  max-width: 100%;
+}
+
+/* Recipe Results Cards - Better grid layout */
+.row.row-cols-1.row-cols-md-2.row-cols-lg-3 {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.row.row-cols-1.row-cols-md-2.row-cols-lg-3 .col {
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+}
+
+/* Form Controls - Better width */
+.container .card-body form .row {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.container .card-body form .row .col-md-6,
+.container .card-body form .row .col-md-4 {
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+}
+
+/* Card Body Padding Adjustments */
+.card-body {
+  padding: 1.5rem;
+}
+
+@media (min-width: 992px) {
+  .card-body {
+    padding: 2rem;
+  }
+}
+
+/* Container Max Width for Better Fit */
+.container {
+  max-width: 1400px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Container XXL Centering */
+.container-xxl {
+  max-width: 1400px;
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
+}
+
+/* Center hero section content */
+.discover-hero .row {
+  align-items: center;
+}
+
+.discover-hero .col-lg-7,
+.discover-hero .col-lg-8 {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.discover-hero .col-lg-5,
+.discover-hero .col-lg-4 {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Center dashboard action cards */
+.row.g-4 {
+  justify-content: center;
+}
+
+.row.g-4 > [class*="col-"] {
+  display: flex;
+  flex-direction: column;
+}
+
+.row.g-4 > [class*="col-"] > .card {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.row.g-4 > [class*="col-"] > .card > .card-body {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+/* Center empty states */
+.text-center {
+  text-align: center !important;
+}
+
+/* Ensure proper alignment for card headers */
+.card-header {
+  display: flex;
+  align-items: center;
+}
+
+/* Additional fix for card headers - ensure text is visible */
+.card-header:not(.bg-white) {
+  color: white;
+}
+
+.card-header.bg-white * {
+  color: var(--text-primary) !important;
+}
+
+/* Center form sections */
+.card-body form {
+  width: 100%;
+}
+
+/* Center buttons in text-center cards */
+.card-body.text-center .btn {
+  display: inline-block;
+}
+
+/* Ensure recipe cards are properly aligned */
+.row.row-cols-1.row-cols-md-2.row-cols-lg-3 {
+  justify-content: center;
+}
+
+.row.row-cols-1.row-cols-md-2.row-cols-lg-3 > .col {
+  display: flex;
+  flex-direction: column;
+}
+
+.row.row-cols-1.row-cols-md-2.row-cols-lg-3 > .col > .card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  margin: 0 auto;
+}
+
+/* Center alert messages */
+.alert {
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 100%;
+}
+
+/* Center card headers content */
+.card-header > div {
+  width: 100%;
+}
+
+/* Center form rows */
+form .row {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+/* Ensure proper centering for all page containers */
+.discover-page .container-xxl {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.discover-page .container-xxl > .row {
+  width: 100%;
+  max-width: 100%;
+}
+
+/* Center section elements */
+section {
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Settings Page Specific - Remove restrictive width */
+.container.mt-5 .row.justify-content-center {
+  justify-content: flex-start !important;
+}
+
+.container.mt-5 .row.justify-content-center > div {
+  flex: 0 0 100%;
+  max-width: 100%;
+}
+
+@media (min-width: 768px) {
+  .container.mt-5 .row.justify-content-center > div {
+    flex: 0 0 90%;
+    max-width: 90%;
+  }
+}
+
+@media (min-width: 992px) {
+  .container.mt-5 .row.justify-content-center > div {
+    flex: 0 0 85%;
+    max-width: 85%;
+  }
+}
+
+/* Dashboard Styles */
+.dashboard-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.stat-card {
+  background: white;
+  padding: 1.5rem;
+  border-radius: var(--border-radius);
+  box-shadow: var(--card-shadow);
+  text-align: center;
+}
+
+.stat-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--primary-color);
+  margin-bottom: 0.5rem;
+}
+
+.stat-label {
+  color: #666;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Discover Page Styling - Applied to all pages */
+.discover-page {
+  background: linear-gradient(180deg, rgba(102, 126, 234, 0.12) 0%, rgba(118, 75, 162, 0.08) 35%, rgba(255, 255, 255, 0.9) 100%);
+}
+
+.discover-hero {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f4a261 100%);
+}
+
+.text-white-75 {
+  color: rgba(255, 255, 255, 0.75) !important;
+}
+
+.discover-hero .badge {
+  letter-spacing: 0.08em;
+}
+
+.discover-hero-illustration {
+  backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.92);
+  border-radius: 1.5rem;
+}
+
+.discover-hero-illustration .discover-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  display: inline-block;
+}
+
+.discover-stat {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 1rem;
+  min-width: 140px;
+}
+
+.discover-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  display: inline-block;
+}
+
+@media (max-width: 767.98px) {
+  .discover-hero {
+    padding: 2.5rem !important;
+  }
+}
+
