@@ -1,0 +1,92 @@
+1) Team 014 -2
+2) BudgetBites
+3) Members:
+    Manan Kothari - Manan-KK - mako1963@colorado.edu
+    Will Gantt - WillGantt - wiga7071@colorado.edu
+    Justin Nguyen - jung2014 - jung2014@colorado.edu
+    George Latham - GeorgeLatham06 - gela2135@colorado.edu
+4) BudgetBites
+5)BudgetBites is a meal-planning web app designed specifically for college students who want to eat well without draining their wallet. 
+The app helps users generate weekly meal plans and grocery lists that prioritize low-cost ingredients, simple recipes, and minimal cooking equipment for dorm kitchens or shared student apartments. Users can input dietary restrictions, food preferences, cook time preferences and a weekly budget, and BudgetBites will match them with affordable recipes and meal plans optimized for cost and convenience.
+Instead of relying on random TikTok recipes or expensive delivery apps, BudgetBites provides structure, predictability, and real savings. It takes the stress out of figuring out what to eat, helps users avoid impulsive takeout spending, and encourages healthier and cheaper eating habits over time.
+6) The main audience is towards those who prefer convenience and cost over maximum quality like college students or busy workers.
+7)For college students or busy workers struggling to eat affordably and consistently, BudgetBites is a meal-planning web app that generates cheap, simple weekly meal plans and grocery lists tailored to a student budget. 
+Unlike generic recipe sites or expensive meal kits, BudgetBites focuses on low-cost ingredients, minimal cooking effort, and budget-based planning, making it easier to save money and eat better week to week.
+8) Repository Structure and Files:
+   The project repository is organized as follows:
+   
+   - MilestoneSubmissions/
+     * Proposal.txt (this file)
+     * Wireframes.md (wireframes for all application pages)
+     * UseCase.png and BudgetBites_Use_Case_Diagram_FIXED.png (use case diagrams)
+     * ReleaseNotes/ (version release notes: v1.0.0.txt, v2.0.0.txt, v3.0.0.txt)
+   
+   - ProjectSourceCode/
+     * src/ (main application source code)
+       - app.js (Express application setup)
+       - index.js (application entry point)
+       - config/ (database and API configuration)
+       - controllers/ (request handlers for routes)
+       - middleware/ (authentication middleware)
+       - repositories/ (data access layer)
+       - routes/ (route definitions)
+       - services/ (business logic layer)
+       - utils/ (utility functions)
+     * views/ (Handlebars templates)
+       - layouts/ (main layout template)
+       - pages/ (page templates for all routes)
+       - partials/ (reusable template components)
+     * public/ (static assets)
+       - css/ (stylesheet files)
+       - recipe-images/ (recipe image assets)
+     * database/ (database setup and initialization)
+       - init_data/ (SQL scripts and data files)
+     * scripts/ (utility scripts for data import)
+     * test/ (test files)
+     * package.json (project dependencies and scripts)
+     * docker-compose.yaml (Docker configuration)
+   
+   - TeamMeetingLogs/
+     * meetingMins.txt (team meeting minutes and notes)
+   
+   - README.md (project documentation and deployment instructions)
+9) Agile methodology hybridizing two scrum meetings and a kanban board
+10) We have a group discord server
+11) We will meet Tuesday and Thursday afternoons while meeting with the ta over zoom at 5:45PM on Wednesdays.
+12) Use Case Diagram: See UseCase.png and BudgetBites_Use_Case_Diagram_FIXED.png in MilestoneSubmissions folder.
+
+13) Wireframes: Wireframes for all pages of the application are included in Wireframes.md in the MilestoneSubmissions folder. The wireframes document includes detailed layouts for:
+    - Login Page
+    - Register Page
+    - Dashboard Page
+    - Discover Page
+    - Favorites Page
+    - Grocery List Page
+    - Recipe Detail Page
+    - Settings Page
+    - Logout Page
+    
+    Original wireframe design tool link: https://www.relume.io/app/project/P2656477_RX3TS0XNigWqgcdNe0tqsL9lgx4S8XvsgqdUJb3YDfo#mode=wireframe
+
+There's definitely some shit with that shit
+
+4. Data Loss and Backup Risk
+   Severity: Medium
+   Description: User data, favorites, and preferences could be lost due to database failures, accidental deletions, or system crashes. Without proper backups, recovery would be impossible.
+   Mitigation Strategies:
+   - Implement automated daily database backups
+   - Store backups in multiple locations (local and cloud storage)
+   - Test backup restoration procedures regularly
+   - Implement transaction logging for critical operations
+   - Use database replication for real-time data redundancy
+
+5. Third-Party Service Integration Failure Risk
+   Severity: Medium
+   Description: The application depends on external services (Spoonacular API, deployment platform like Render). If these services experience outages or discontinue support, the application could become non-functional.
+   Mitigation Strategies:
+   - Implement comprehensive error handling and graceful degradation
+   - Design the application architecture to be modular, allowing easy replacement of external services
+   - Monitor third-party service status and health
+   - Maintain documentation of all external dependencies
+   - Have contingency plans for migrating to alternative services if needed
+   - Implement retry logic with exponential backoff for transient failures
